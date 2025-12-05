@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@theme {
+  --color-base-50: var(--color-stone-50);
+  --color-base-100: var(--color-stone-100);
+  --color-base-200: var(--color-stone-200);
+  --color-base-300: var(--color-stone-300);
+  --color-base-400: var(--color-stone-400);
+  --color-base-500: var(--color-stone-500);
+  --color-base-600: var(--color-stone-600);
+  --color-base-700: var(--color-stone-700);
+  --color-base-800: var(--color-stone-800);
+  --color-base-900: var(--color-stone-900);
+}
+
+.box {
+  @apply p-8 bg-base-50 border border-base-200 shadow-[8px_8px_0px_0px] shadow-base-900;
+}
+
+.button {
+  @apply flex flex-col place-items-center gap-2 py-6 border-2 border-base-900 hover:bg-base-900 hover:text-base-50 transition-colors;
+}
