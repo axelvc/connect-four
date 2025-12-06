@@ -14,9 +14,31 @@
 }
 
 .box {
-  @apply p-8 bg-base-50 border border-base-200 shadow-[8px_8px_0px_0px] shadow-base-900;
+  @apply bg-base-50 shadow-[8px_8px_0px_0px] shadow-base-900 border border-base-900;
 }
 
 .button {
   @apply flex flex-col place-items-center gap-2 py-6 border-2 border-base-900 hover:bg-base-900 hover:text-base-50 transition-colors;
+}
+
+@keyframes drop {
+  0% {
+    transform: translateY(calc(-100% * (var(--row) + 1)));
+  }
+
+  65% {
+    transform: translateY(0);
+  }
+
+  80% {
+    transform: translateY(-15%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-drop {
+  animation: drop 0.4s cubic-bezier(0.5, 0.05, 0.2, 1);
 }
