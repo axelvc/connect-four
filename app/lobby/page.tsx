@@ -26,10 +26,7 @@ export default function LobbyPage() {
         </h1>
 
         <div className="mt-8 space-y-6">
-          <button
-            onClick={createLobbyGame}
-            className="button py-4 w-full uppercase text-sm bg-base-900 text-base-50 hover:bg-base-800!"
-          >
+          <button onClick={createLobbyGame} className="button button-alt py-4 w-full uppercase text-sm">
             Create Match
           </button>
 

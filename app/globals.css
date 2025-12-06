@@ -21,6 +21,14 @@
   @apply grid place-items-center gap-2 border-2 font-mono cursor-pointer border-base-900 hover:bg-base-900 hover:text-base-50 transition-colors;
 }
 
+.button-alt {
+  @apply bg-base-900 text-base-50 hover:bg-base-800;
+}
+
+.modal {
+  @apply absolute inset-0 z-10 grid place-items-center bg-base-100/50 backdrop-blur-xs;
+}
+
 @keyframes drop {
   0% {
     transform: translateY(calc(-100% * (var(--row) + 1)));

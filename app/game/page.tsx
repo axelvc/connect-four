@@ -110,7 +110,7 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="w-full p-4 sm:p-6 md:px-12 md:py-8 flex justify-between border-b border-black/10">
+      <header className="w-full p-4 sm:p-6 md:px-12 md:py-8 flex justify-between border-b border-base-300">
         <div className="flex flex-col gap-2">
           {/* back button */}
           <Link
@@ -206,7 +206,7 @@ export default function GamePage() {
 
         {/* waiting for player 2 */}
         {mode === PlayMode.ONLINE && (
-          <div className="absolute inset-0 z-10 grid place-items-center bg-base-100/50 backdrop-blur-xs">
+          <div className="modal">
             <div className="box p-6 max-w-sm text-center">
               <p className="mb-4 font-mono text-sm uppercase tracking-widest">
                 Waiting for Player 2<span className="text-[8px]">...</span>
@@ -219,9 +219,30 @@ export default function GamePage() {
             </div>
           </div>
         )}
+
+        {/* win modal */}
+        {win && (
+          <div className="modal">
+            <div className="text-center">
+              <h2 className="mb-2 sm:mb-4 text-5xl sm:text-7xl md:text-9xl font-bold tracking-tighter uppercase wrap-break-word">
+                {player === Move.PLAYER_1 && 'Player 1 Wins'}
+                {player === Move.PLAYER_2 && 'Player 2 Wins'}
+              </h2>
+
+              <div className="mt-8 sm:mt-12">
+                <button
+                  onClick={resetGame}
+                  className="button button-alt uppercase mx-auto px-6 py-2 sm:px-8 sm:py-3 text-xs tracking-widest font-bold"
+                >
+                  Play Again
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
-      <footer className="w-full p-6 md:px-12 flex justify-between items-end border-t border-black/10 text-[10px] md:text-xs font-mono uppercase tracking-widest text-black/40"></footer>
+      <footer className="w-full p-6 md:px-12 flex text-base-50 border-t border-base-300 text-xs font-mono uppercase tracking-widest"></footer>
     </div>
   )
 }
