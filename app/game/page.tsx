@@ -35,8 +35,7 @@ export default function GamePage() {
   const [player, setPlayer] = useState<Player>(Move.PLAYER_1)
   const [win, setWin] = useState<[number, number][] | null>(null)
   const turnCount = useRef(0)
-  const [isCopied, setIsCopied] = useState(false)
-  const [mode, setMode] = useState<PlayMode>(PlayMode.ONLINE)
+  const [mode, setMode] = useState<PlayMode>(PlayMode.LOCAL)
   const [lobbyCode, setLobbyCode] = useState('12345')
 
   function checkWin(board: Move[][], player: Player): [number, number][] | null {
@@ -98,12 +97,6 @@ export default function GamePage() {
     }
   }
 
-  function copyCode() {
-    navigator.clipboard.writeText('12345')
-    setIsCopied(true)
-    setTimeout(() => setIsCopied(false), 2000)
-  }
-
   function resetGame() {
     setBoard(
       Array(COLS)
@@ -116,7 +109,7 @@ export default function GamePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-base-200 text-base-900 font-sans">
+    <div className="min-h-screen flex flex-col">
       <header className="w-full p-4 sm:p-6 md:px-12 md:py-8 flex justify-between border-b border-black/10">
         <div className="flex flex-col gap-2">
           {/* back button */}
@@ -138,15 +131,7 @@ export default function GamePage() {
               {mode === PlayMode.LOCAL ? 'Local mode' : `CODE: #${lobbyCode}`}
             </span>
 
-            {mode === PlayMode.ONLINE && (
-              <button
-                onClick={copyCode}
-                aria-label="Copy lobby code"
-                className="cursor-pointer size-6 grid place-items-center"
-              >
-                {isCopied ? <Check size={14} /> : <Copy size={14} />}
-              </button>
-            )}
+            {mode === PlayMode.ONLINE && <CopyButton />}
           </div>
         </div>
 
@@ -170,7 +155,7 @@ export default function GamePage() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col justify-center items-center">
+      <main className="relative flex-1 flex flex-col justify-center items-center">
         {/* board */}
         <div className="box flex cursor-pointer">
           {board.map((col, cIdx) => (
@@ -218,6 +203,22 @@ export default function GamePage() {
           <span className="opacity-30">VS</span>
           <Player name="Player 2" active={player === Move.PLAYER_2} />
         </div>
+
+        {/* waiting for player 2 */}
+        {mode === PlayMode.ONLINE && (
+          <div className="absolute inset-0 z-10 grid place-items-center bg-base-100/50 backdrop-blur-xs">
+            <div className="box p-6 max-w-sm text-center">
+              <p className="mb-4 font-mono text-sm uppercase tracking-widest">
+                Waiting for Player 2<span className="text-[8px]">...</span>
+              </p>
+              <div className="p-2 mb-2 border border-base-900 bg-base-200/50">
+                <span className="font-bold text-xl tracking-widest select-all">{lobbyCode}</span>
+                <CopyButton />
+              </div>
+              <p className="text-xs opacity-50 uppercase">Share this code with your friend</p>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="w-full p-6 md:px-12 flex justify-between items-end border-t border-black/10 text-[10px] md:text-xs font-mono uppercase tracking-widest text-black/40"></footer>
@@ -231,5 +232,25 @@ const Player = ({ name, active }: { name: string; active: boolean }) => {
       <div className="size-2 rounded-full bg-base-900"></div>
       <span className="underline decoration-dotted">{name}</span>
     </div>
+  )
+}
+
+const CopyButton = () => {
+  const [isCopied, setIsCopied] = useState(false)
+
+  function copyCode() {
+    navigator.clipboard.writeText('12345')
+    setIsCopied(true)
+    setTimeout(() => setIsCopied(false), 2000)
+  }
+
+  return (
+    <button
+      onClick={copyCode}
+      aria-label="Copy lobby code"
+      className="size-6 inline-grid place-items-center hover:opacity-50 cursor-pointer"
+    >
+      {isCopied ? <Check size={14} /> : <Copy size={14} />}
+    </button>
   )
 }
