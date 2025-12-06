@@ -1,111 +1,72 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffectEvent, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import clsx from 'clsx'
 import Link from 'next/link'
-import { ArrowDown, Check, ChevronLeft, Copy, RefreshCcw, Unplug } from 'lucide-react'
+import { ArrowDown, Check, ChevronLeft, Copy, RefreshCcw, Unplug, Globe, X } from 'lucide-react'
+import { Player, Status, useGame } from '@/hooks/useGame'
+import useLobby, { LobbyStatus } from '@/hooks/useLobby'
+import { MessageHandler, P2PEventType, P2PMessage } from '@/lib/p2p'
+
+export enum PlayMode {
+  LOCAL,
+  ONLINE,
+}
 
 export const cn = (...inputs: any[]) => {
   return twMerge(clsx(inputs))
 }
 
-const COLS = 7
-const ROWS = 6
-
-enum Move {
-  EMPTY,
-  PLAYER_1,
-  PLAYER_2,
-}
-
-enum PlayMode {
-  LOCAL,
-  ONLINE,
-}
-
-type Player = Exclude<Move, Move.EMPTY>
-
 export default function GamePage() {
-  const [board, setBoard] = useState<Move[][]>(() =>
-    Array(COLS)
-      .fill(0)
-      .map(() => Array(ROWS).fill(Move.EMPTY)),
-  )
-  const [player, setPlayer] = useState<Player>(Move.PLAYER_1)
-  const [win, setWin] = useState<[number, number][] | null>(null)
-  const turnCount = useRef(0)
   const [mode, setMode] = useState<PlayMode>(PlayMode.LOCAL)
-  const [lobbyCode, setLobbyCode] = useState('12345')
-
-  function checkWin(board: Move[][], player: Player): [number, number][] | null {
-    const WIN_LENGTH = 4
-
-    const directions = [
-      [0, 1], // Horizontal
-      [1, 0], // Vertical
-      [1, 1], // Diagonal (top-left to bottom-right)
-      [1, -1], // Diagonal (top-right to bottom-left)
-    ]
-
-    for (let col = 0; col < COLS; col++) {
-      for (let row = 0; row < ROWS; row++) {
-        if (board[col][row] !== player) continue
-
-        for (const [dx, dy] of directions) {
-          const winningCells: [number, number][] = []
-
-          for (let i = 0; i < WIN_LENGTH; i++) {
-            const c = col + i * dx
-            const r = row + i * dy
-
-            if (c < 0 || c >= COLS || r < 0 || r >= ROWS || board[c][r] !== player) {
-              break
-            }
-
-            winningCells.push([c, r])
-          }
-
-          if (winningCells.length === WIN_LENGTH) {
-            return winningCells
-          }
-        }
+  const [joinCode, setJoinCode] = useState('')
+  const game = useGame()
+  const lobby = useLobby({
+    onConnect: useEffectEvent(() => {
+      reset(true)
+    }),
+    onMessage: useEffectEvent<MessageHandler>(msg => {
+      switch (msg.type) {
+        case P2PEventType.MOVE:
+          move(msg.payload, true)
+          break
+        case P2PEventType.RESET:
+          reset(true)
+          break
       }
-    }
+    }),
+    onDisconnect: useEffectEvent(() => {
+      reset(true)
+    }),
+  })
 
-    return null
+  const isOnline = mode === PlayMode.ONLINE
+
+  function move(col: number, isRemote: boolean = false) {
+    if (isOnline && !isRemote && lobby.myTurn !== game.player) return
+    game.move(col)
+
+    if (isOnline && isRemote) return
+    lobby.send(P2PEventType.MOVE, col)
   }
 
-  function handleMove(colIdx: number) {
-    const newBoard = [...board]
-    const col = newBoard[colIdx]
-    const rowIdx = col.findLastIndex(row => row === Move.EMPTY)
+  function reset(isRemote = false) {
+    game.reset()
 
-    if (rowIdx === -1) return
-    col[rowIdx] = player
-
-    setBoard(newBoard)
-    const win = checkWin(newBoard, player)
-
-    if (win) {
-      setWin(win)
-    } else if (turnCount.current === COLS * ROWS) {
-      // draw
-    } else {
-      setPlayer(player === Move.PLAYER_1 ? Move.PLAYER_2 : Move.PLAYER_1)
-      turnCount.current++
-    }
+    if (isOnline && isRemote) return
+    lobby.send(P2PEventType.RESET)
   }
 
-  function resetGame() {
-    setBoard(
-      Array(COLS)
-        .fill(0)
-        .map(() => Array(ROWS).fill(Move.EMPTY)),
-    )
-    setPlayer(Move.PLAYER_1)
-    setWin(null)
-    turnCount.current = 0
+  function joinRoom() {
+    if (!joinCode) return
+    lobby.join(joinCode)
+    setJoinCode('')
+  }
+
+  function leaveRoom() {
+    lobby.disconnect()
+    setMode(PlayMode.LOCAL)
   }
 
   return (
@@ -128,27 +89,49 @@ export default function GamePage() {
           {/* lobby code */}
           <div className="flex gap-1">
             <span className="px-2 py-1 bg-base-900 text-base-50 text-xs font-mono uppercase tracking-widest">
-              {mode === PlayMode.LOCAL ? 'Local mode' : `CODE: #${lobbyCode}`}
+              {mode === PlayMode.LOCAL
+                ? 'Local mode'
+                : lobby.status === LobbyStatus.CONNECTED
+                ? 'Online Match'
+                : lobby.code
+                ? `CODE: #${lobby.code}`
+                : 'Connecting...'}
             </span>
 
-            {mode === PlayMode.ONLINE && <CopyButton />}
+            {isOnline && lobby.code && <CopyButton code={lobby.code} />}
           </div>
         </div>
 
         <div className="flex flex-col self-end gap-4 text-xs font-mono tracking-widest">
           {/* leave match button */}
-          {mode === PlayMode.ONLINE && (
-            <Link href="/" className="flex items-center gap-2 uppercase hover:underline text-red-600">
+          {isOnline && (
+            <button
+              onClick={leaveRoom}
+              className="flex items-center gap-2 uppercase hover:underline text-red-600 cursor-pointer"
+            >
               <Unplug size={14} />
               Leave Match
-            </Link>
+            </button>
+          )}
+
+          {!isOnline && (
+            <button
+              onClick={() => setMode(PlayMode.ONLINE)}
+              className="flex items-center gap-2 uppercase hover:underline text-blue-500 cursor-pointer"
+            >
+              <Globe size={14} />
+              Play Online
+            </button>
           )}
 
           {/* reset button */}
-          <button onClick={resetGame} className="flex uppercase items-center gap-2 cursor-pointer group">
+          <button onClick={() => reset()} className="flex uppercase items-center gap-2 cursor-pointer group">
             <RefreshCcw
               size={14}
-              className={cn('transition-transform duration-700 group-hover:rotate-180', win && 'rotate-180')}
+              className={cn(
+                'transition-transform duration-700 group-hover:rotate-180',
+                game.status !== Status.IN_PROGRESS && 'rotate-180',
+              )}
             />
             Reset Board
           </button>
@@ -158,12 +141,12 @@ export default function GamePage() {
       <main className="relative flex-1 flex flex-col justify-center items-center">
         {/* board */}
         <div className="box flex cursor-pointer">
-          {board.map((col, cIdx) => (
-            <div key={cIdx} className="group relative" onClick={() => handleMove(cIdx)}>
+          {game.board.map((col, cIdx) => (
+            <div key={cIdx} className="group relative" onClick={() => move(cIdx)}>
               <ArrowDown className="hidden group-hover:block absolute left-1/2 bottom-full -translate-x-1/2 -translate-y-4 size-4 sm:size-5 md:size-6 animate-bounce opacity-50" />
 
               {col.map((cell, rIdx) => {
-                const isWin = win?.some(([c, r]) => c === cIdx && r === rIdx)
+                const isWin = game.winMatch?.some(([c, r]) => c === cIdx && r === rIdx)
 
                 return (
                   <div
@@ -174,20 +157,20 @@ export default function GamePage() {
                     )}
                   >
                     {/* piece */}
-                    {cell !== Move.EMPTY && (
+                    {cell !== null && (
                       <div
                         style={{ ['--row']: rIdx + 1 }}
                         className={cn(
                           'size-full rounded-full scale-70 absolute animate-drop',
-                          cell === Move.PLAYER_1 && 'bg-base-900',
-                          cell === Move.PLAYER_2 && 'border-8 border-base-900',
+                          cell === Player.PLAYER_1 && 'bg-base-900',
+                          cell === Player.PLAYER_2 && 'border-8 border-base-900',
                           isWin && 'invert',
                         )}
                       ></div>
                     )}
 
                     {/* hover indicator */}
-                    {cell === Move.EMPTY && (
+                    {cell === null && (
                       <div className="absolute inset-0 rounded-full bg-current/5 scale-30 hidden group-hover:block" />
                     )}
                   </div>
@@ -199,41 +182,85 @@ export default function GamePage() {
 
         {/* current player */}
         <div className="mt-8 flex items-center gap-4 text-xs font-mono uppercase tracking-widest">
-          <Player name="Player 1" active={player === Move.PLAYER_1} />
+          <Turn name="Player 1" active={game.player === Player.PLAYER_1} />
           <span className="opacity-30">VS</span>
-          <Player name="Player 2" active={player === Move.PLAYER_2} />
+          <Turn name="Player 2" active={game.player === Player.PLAYER_2} />
         </div>
 
-        {/* waiting for player 2 */}
-        {mode === PlayMode.ONLINE && (
+        {/* Online Setup Modal */}
+        {isOnline && lobby.status !== LobbyStatus.CONNECTED && (
           <div className="modal">
-            <div className="box p-6 max-w-sm text-center">
-              <p className="mb-4 font-mono text-sm uppercase tracking-widest">
-                Waiting for Player 2<span className="text-[8px]">...</span>
-              </p>
-              <div className="relative p-2 mb-2 border border-base-900 bg-base-200/50">
-                <span className="font-bold text-xl tracking-widest select-all">{lobbyCode}</span>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                  <CopyButton />
+            <div className="box p-6 max-w-sm text-center w-full relative">
+              <button onClick={leaveRoom} className="absolute top-2 left-2 cursor-pointer">
+                <X size={14} />
+              </button>
+
+              {lobby.status === LobbyStatus.WAITING && (
+                <>
+                  <p className="mb-4 font-mono text-sm uppercase tracking-widest">
+                    Waiting for Player 2<span className="text-[8px]">...</span>
+                  </p>
+
+                  <div className="relative p-2 mb-2 border border-base-900 bg-base-200/50">
+                    <span className="font-bold text-xl tracking-widest select-all">{lobby.code || 'Loading...'}</span>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      <CopyButton code={lobby.code} />
+                    </div>
+                  </div>
+
+                  <p className="text-xs opacity-50 uppercase">Share this code with your friend</p>
+
+                  <button
+                    onClick={lobby.reset}
+                    className="text-xs underline opacity-50 hover:opacity-100 mt-6 uppercase tracking-widest"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+
+              {lobby.status === LobbyStatus.IDLE && (
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="ENTER CODE"
+                      value={joinCode}
+                      onChange={e => setJoinCode(e.target.value)}
+                      className="grow p-3 bg-base-200/50 border border-base-900 font-mono text-sm uppercase focus:bg-transparent transition-colors"
+                    />
+                    <button onClick={joinRoom} className="button px-6 uppercase text-sm">
+                      Join
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-base-400">
+                    <div className="h-px bg-current opacity-50 grow"></div>
+                    <span className="font-mono text-xs uppercase">OR</span>
+                    <div className="h-px bg-current opacity-50 grow"></div>
+                  </div>
+
+                  <button onClick={lobby.create} className="button button-alt py-4 w-full uppercase text-sm">
+                    Create Match
+                  </button>
                 </div>
-              </div>
-              <p className="text-xs opacity-50 uppercase">Share this code with your friend</p>
+              )}
             </div>
           </div>
         )}
 
         {/* win modal */}
-        {win && (
+        {game.status !== Status.IN_PROGRESS && (
           <div className="modal">
             <div className="text-center">
               <h2 className="mb-2 sm:mb-4 text-5xl sm:text-7xl md:text-9xl font-bold tracking-tighter uppercase wrap-break-word">
-                {player === Move.PLAYER_1 && 'Player 1 Wins'}
-                {player === Move.PLAYER_2 && 'Player 2 Wins'}
+                {game.player === Player.PLAYER_1 && 'Player 1 Wins'}
+                {game.player === Player.PLAYER_2 && 'Player 2 Wins'}
               </h2>
 
               <div className="mt-8 sm:mt-12">
                 <button
-                  onClick={resetGame}
+                  onClick={() => reset()}
                   className="button button-alt uppercase mx-auto px-6 py-2 sm:px-8 sm:py-3 text-xs tracking-widest font-bold"
                 >
                   Play Again
@@ -249,7 +276,7 @@ export default function GamePage() {
   )
 }
 
-const Player = ({ name, active }: { name: string; active: boolean }) => {
+const Turn = ({ name, active }: { name: string; active: boolean }) => {
   return (
     <div className={cn('flex items-center gap-2 transition-opacity', active ? 'opacity-100' : 'opacity-30')}>
       <div className="size-2 rounded-full bg-base-900"></div>
@@ -258,11 +285,11 @@ const Player = ({ name, active }: { name: string; active: boolean }) => {
   )
 }
 
-const CopyButton = () => {
+const CopyButton = ({ code }: { code: string }) => {
   const [isCopied, setIsCopied] = useState(false)
 
   function copyCode() {
-    navigator.clipboard.writeText('12345')
+    navigator.clipboard.writeText(code)
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
   }
