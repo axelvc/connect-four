@@ -115,7 +115,7 @@ export default function GamePage() {
           {/* back button */}
           <Link
             href="/"
-            className="flex items-center gap-1 text-xs font-mono uppercase tracking-widest hover:underline opacity-50 hover:opacity-100 transition-opacity"
+            className="self-start flex items-center gap-1 text-xs font-mono uppercase tracking-widest hover:underline opacity-50 hover:opacity-100 transition-opacity"
           >
             <ChevronLeft size={10} />
             Menu
@@ -211,9 +211,11 @@ export default function GamePage() {
               <p className="mb-4 font-mono text-sm uppercase tracking-widest">
                 Waiting for Player 2<span className="text-[8px]">...</span>
               </p>
-              <div className="p-2 mb-2 border border-base-900 bg-base-200/50">
+              <div className="relative p-2 mb-2 border border-base-900 bg-base-200/50">
                 <span className="font-bold text-xl tracking-widest select-all">{lobbyCode}</span>
-                <CopyButton />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                  <CopyButton />
+                </div>
               </div>
               <p className="text-xs opacity-50 uppercase">Share this code with your friend</p>
             </div>
@@ -269,7 +271,7 @@ const CopyButton = () => {
     <button
       onClick={copyCode}
       aria-label="Copy lobby code"
-      className="size-6 inline-grid place-items-center hover:opacity-50 cursor-pointer"
+      className="size-6 inline-grid place-items-center hover:opacity-50 cursor-pointer outline-offset-0!"
     >
       {isCopied ? <Check size={14} /> : <Copy size={14} />}
     </button>

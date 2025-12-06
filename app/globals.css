@@ -13,6 +13,11 @@
   --color-base-900: var(--color-stone-900);
 }
 
+*:focus-visible {
+  outline: solid 2px var(--color-base-900);
+  outline-offset: 2px;
+}
+
 .box {
   @apply bg-base-50 shadow-[8px_8px_0px_0px] shadow-base-900 border border-base-900;
 }
