@@ -3,7 +3,6 @@
 import { useEffectEvent, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import clsx from 'clsx'
-import Link from 'next/link'
 import { ArrowDown, Check, ChevronLeft, Copy, RefreshCcw, Unplug, Globe, X } from 'lucide-react'
 import { Player, GameStatus, useGame } from '@/hooks/useGame'
 import useLobby, { LobbyStatus } from '@/hooks/useLobby'
@@ -25,7 +24,7 @@ export default function GamePage() {
   const game = useGame()
   const lobby = useLobby({
     onConnect: useEffectEvent(() => {
-      reset(true)
+      reset(true, true)
     }),
     onMessage: useEffectEvent<MessageHandler>(msg => {
       switch (msg.type) {
@@ -38,7 +37,7 @@ export default function GamePage() {
       }
     }),
     onDisconnect: useEffectEvent(() => {
-      reset(true)
+      reset(true, true)
     }),
   })
 
@@ -56,8 +55,8 @@ export default function GamePage() {
     lobby.send(P2PEventType.MOVE, col)
   }
 
-  function reset(isRemote = false) {
-    game.reset()
+  function reset(isRemote = false, clearHistory = false) {
+    game.reset(clearHistory)
 
     if (isOnline && isRemote) return
     lobby.send(P2PEventType.RESET)
@@ -83,20 +82,9 @@ export default function GamePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-base-200 w-full p-4 sm:p-6 md:px-12 md:py-8 flex justify-between border-b border-base-300">
-        <div className="flex flex-col gap-2">
-          {/* back button */}
-          <Link
-            href="/"
-            className="self-start flex items-center gap-1 text-xs font-mono uppercase tracking-widest hover:underline opacity-50 hover:opacity-100 transition-opacity"
-          >
-            <ChevronLeft size={10} />
-            Menu
-          </Link>
-
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter leading-none uppercase">
-            Connect <br /> Four
-          </h1>
-        </div>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter leading-none uppercase">
+          Connect <br /> Four
+        </h1>
 
         <div className="flex flex-col self-end gap-4 text-xs font-mono tracking-widest">
           {/* leave match button */}
@@ -226,7 +214,7 @@ export default function GamePage() {
 
                   <button
                     onClick={lobby.reset}
-                    className="text-xs underline opacity-50 hover:opacity-100 mt-6 uppercase tracking-widest"
+                    className="text-xs underline opacity-50 hover:opacity-100 mt-6 uppercase tracking-widest cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -290,7 +278,7 @@ export default function GamePage() {
         {/* status */}
         <span
           className={cn(
-            'ml-auto px-2 py-1 bg-base-900 text-base-50 text-xs font-mono uppercase tracking-widest',
+            'px-2 py-1 bg-base-900 text-base-50',
             isOnline &&
               isConnected &&
               game.player !== lobby.myTurn &&
@@ -306,6 +294,33 @@ export default function GamePage() {
             : lobby.myTurn === game.player
             ? 'My turn'
             : 'Opponent turn'}
+        </span>
+
+        {/* history */}
+        <span className="ml-auto">
+          {game.history.slice(-10).map((player, index) => {
+            const onlineMode = isOnline && isConnected && isPlaying
+
+            return (
+              <span
+                key={index}
+                className={cn(
+                  'size-4 inline-grid place-items-center border',
+                  !onlineMode &&
+                    (player === Player.PLAYER_1
+                      ? 'border-base-900 bg-base-900 text-base-50'
+                      : 'border-base-900 text-base-900'),
+                  onlineMode &&
+                    (player === Player.PLAYER_1
+                      ? 'border-emerald-400 bg-emerald-400 text-emerald-900'
+                      : 'border-rose-400 bg-rose-400 text-rose-900'),
+                )}
+              >
+                {!onlineMode && (player === Player.PLAYER_1 ? '1' : '2')}
+                {onlineMode && (player === lobby.myTurn ? 'W' : 'L')}
+              </span>
+            )
+          })}
         </span>
       </footer>
     </div>

@@ -25,6 +25,7 @@ export function useGame() {
   const [status, setStatus] = useState<GameStatus>(GameStatus.IN_PROGRESS)
   const [player, setPlayer] = useState<Player>(Player.PLAYER_1)
   const [board, setBoard] = useState<Player[][]>(createBoard)
+  const [history, setHistory] = useState<Player[]>([])
   const winMatch = useRef<WinMatch | null>(null)
   const turnCount = useRef(1)
 
@@ -86,7 +87,10 @@ export function useGame() {
     }
   }
 
-  function reset() {
+  function reset(clearHistory = false) {
+    if (!clearHistory && status === GameStatus.WINNER) setHistory(history => [...history, player])
+    else if (clearHistory) setHistory([])
+
     setBoard(createBoard())
     setPlayer(Player.PLAYER_1)
     setStatus(GameStatus.IN_PROGRESS)
@@ -99,6 +103,7 @@ export function useGame() {
     status,
     board,
     player,
+    history,
     get winMatch(): WinMatch | null {
       return winMatch.current
     },
