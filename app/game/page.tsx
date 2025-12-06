@@ -110,7 +110,7 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="w-full p-4 sm:p-6 md:px-12 md:py-8 flex justify-between border-b border-base-300">
+      <header className="bg-base-200 w-full p-4 sm:p-6 md:px-12 md:py-8 flex justify-between border-b border-base-300">
         <div className="flex flex-col gap-2">
           {/* back button */}
           <Link
@@ -244,7 +244,7 @@ export default function GamePage() {
         )}
       </main>
 
-      <footer className="w-full p-6 md:px-12 flex text-base-50 border-t border-base-300 text-xs font-mono uppercase tracking-widest"></footer>
+      <footer className="bg-base-200 w-full p-6 md:px-12 flex text-base-50 border-t border-base-300 text-xs font-mono uppercase tracking-widest"></footer>
     </div>
   )
 }

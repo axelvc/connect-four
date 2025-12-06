@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Background from '@/components/Background'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased bg-base-200 text-base-900">{children}</body>
+      <body className="antialiased bg-base-200 text-base-900">
+        {children}
+        <Background />
+      </body>
     </html>
   )
 }

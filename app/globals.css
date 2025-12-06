@@ -35,7 +35,7 @@
 }
 
 .modal {
-  @apply absolute inset-0 z-10 grid place-items-center bg-base-100/50 backdrop-blur-xs;
+  @apply absolute inset-0 z-10 grid place-items-center bg-base-200/20 backdrop-blur-[2px];
 }
 
 @keyframes drop {
