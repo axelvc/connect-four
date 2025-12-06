@@ -80,19 +80,16 @@ export default function GamePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col uppercase">
       <header className="bg-base-200 w-full p-4 sm:p-6 md:px-12 md:py-8 flex justify-between border-b border-base-300">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter leading-none uppercase">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter leading-none">
           Connect <br /> Four
         </h1>
 
         <div className="flex flex-col self-end gap-4 text-xs font-mono tracking-widest">
           {/* leave match button */}
           {isOnline && (
-            <button
-              onClick={leaveRoom}
-              className="flex items-center gap-2 uppercase hover:underline text-red-600 cursor-pointer"
-            >
+            <button onClick={leaveRoom} className="flex items-center gap-2 hover:underline text-red-600 cursor-pointer">
               <Unplug size={14} />
               Leave Match
             </button>
@@ -101,7 +98,7 @@ export default function GamePage() {
           {!isOnline && (
             <button
               onClick={() => setMode(PlayMode.ONLINE)}
-              className="flex items-center gap-2 uppercase hover:underline text-blue-500 cursor-pointer"
+              className="flex items-center gap-2 hover:underline text-blue-500 cursor-pointer"
             >
               <Globe size={14} />
               Play Online
@@ -109,7 +106,7 @@ export default function GamePage() {
           )}
 
           {/* reset button */}
-          <button onClick={() => reset()} className="flex uppercase items-center gap-2 cursor-pointer group">
+          <button onClick={() => reset()} className="flex items-center gap-2 cursor-pointer group">
             <RefreshCcw
               size={14}
               className={cn('transition-transform duration-700 group-hover:rotate-180', !isPlaying && 'rotate-180')}
@@ -162,7 +159,7 @@ export default function GamePage() {
         </div>
 
         {/* current player */}
-        <div className="mt-8 flex items-center gap-4 text-xs font-mono uppercase tracking-widest">
+        <div className="mt-8 flex items-center gap-4 text-xs font-mono tracking-widest">
           <div
             className={cn(
               'flex items-center gap-2 transition-opacity',
@@ -194,7 +191,7 @@ export default function GamePage() {
 
               {isWaiting && (
                 <>
-                  <p className="mb-4 font-mono text-sm uppercase tracking-widest">
+                  <p className="mb-4 font-mono text-sm tracking-widest">
                     Waiting for Player 2<span className="text-[8px]">...</span>
                   </p>
 
@@ -210,11 +207,11 @@ export default function GamePage() {
                     </button>
                   </div>
 
-                  <p className="mt-2 text-xs opacity-50 uppercase">Share this code with your friend</p>
+                  <p className="mt-2 text-xs opacity-50">Share this code with your friend</p>
 
                   <button
                     onClick={lobby.reset}
-                    className="text-xs underline opacity-50 hover:opacity-100 mt-6 uppercase tracking-widest cursor-pointer"
+                    className="text-xs underline opacity-50 hover:opacity-100 mt-6 tracking-widest cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -231,18 +228,18 @@ export default function GamePage() {
                       onChange={e => setJoinCode(e.target.value)}
                       className="grow p-3 bg-base-200/50 border border-base-900 font-mono text-sm focus:bg-transparent transition-colors"
                     />
-                    <button onClick={joinRoom} className="button px-6 uppercase text-sm">
+                    <button onClick={joinRoom} className="button px-6 text-sm">
                       Join
                     </button>
                   </div>
 
                   <div className="flex items-center gap-2 text-base-400">
                     <div className="h-px bg-current opacity-50 grow"></div>
-                    <span className="font-mono text-xs uppercase">OR</span>
+                    <span className="font-mono text-xs">OR</span>
                     <div className="h-px bg-current opacity-50 grow"></div>
                   </div>
 
-                  <button onClick={lobby.create} className="button button-alt py-4 w-full uppercase text-sm">
+                  <button onClick={lobby.create} className="button button-alt py-4 w-full text-sm">
                     Create Match
                   </button>
                 </div>
@@ -255,7 +252,7 @@ export default function GamePage() {
         {!isPlaying && (
           <div className="modal">
             <div className="text-center">
-              <h2 className="mb-2 sm:mb-4 text-5xl sm:text-7xl md:text-9xl font-bold tracking-tighter uppercase wrap-break-word">
+              <h2 className="mb-2 sm:mb-4 text-5xl sm:text-7xl md:text-9xl font-bold tracking-tighter wrap-break-word">
                 {game.status === GameStatus.DRAW && 'Draw'}
                 {game.status === GameStatus.WINNER &&
                   (game.player === Player.PLAYER_1 ? 'Player 1 Wins' : 'Player 2 Wins')}
@@ -264,7 +261,7 @@ export default function GamePage() {
               <div className="mt-8 sm:mt-12">
                 <button
                   onClick={() => reset()}
-                  className="button button-alt uppercase mx-auto px-6 py-2 sm:px-8 sm:py-3 text-xs tracking-widest font-bold"
+                  className="button button-alt mx-auto px-6 py-2 sm:px-8 sm:py-3 text-xs tracking-widest font-bold"
                 >
                   Play Again
                 </button>
@@ -274,7 +271,7 @@ export default function GamePage() {
         )}
       </main>
 
-      <footer className="w-full px-4 py-6 sm:p-6 md:px-12 flex items-center bg-base-200 text-base-900 border-t border-base-300 text-xs font-mono uppercase tracking-widest">
+      <footer className="w-full px-4 py-6 sm:p-6 md:px-12 flex items-center bg-base-200 text-base-900 border-t border-base-300 text-xs font-mono tracking-widest">
         {/* status */}
         <span
           className={cn(
