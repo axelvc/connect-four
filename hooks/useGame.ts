@@ -5,7 +5,7 @@ export enum Player {
   PLAYER_2,
 }
 
-export enum Status {
+export enum GameStatus {
   IN_PROGRESS,
   WINNER,
   DRAW,
@@ -22,11 +22,11 @@ const createBoard = (): Player[][] =>
     .map(() => Array(ROWS).fill(null))
 
 export function useGame() {
-  const [status, setStatus] = useState<Status>(Status.IN_PROGRESS)
+  const [status, setStatus] = useState<GameStatus>(GameStatus.IN_PROGRESS)
   const [player, setPlayer] = useState<Player>(Player.PLAYER_1)
   const [board, setBoard] = useState<Player[][]>(createBoard)
   const winMatch = useRef<WinMatch | null>(null)
-  const turnCount = useRef(0)
+  const turnCount = useRef(1)
 
   function _checkWin() {
     const WIN_LENGTH = 4
@@ -76,9 +76,10 @@ export function useGame() {
     _checkWin()
 
     if (winMatch.current) {
-      setStatus(Status.WINNER)
+      setStatus(GameStatus.WINNER)
     } else if (turnCount.current === COLS * ROWS) {
-      setStatus(Status.DRAW)
+      console.log('draw')
+      setStatus(GameStatus.DRAW)
     } else {
       setPlayer(player === Player.PLAYER_1 ? Player.PLAYER_2 : Player.PLAYER_1)
       turnCount.current++
@@ -88,9 +89,9 @@ export function useGame() {
   function reset() {
     setBoard(createBoard())
     setPlayer(Player.PLAYER_1)
-    setStatus(Status.IN_PROGRESS)
+    setStatus(GameStatus.IN_PROGRESS)
     winMatch.current = null
-    turnCount.current = 0
+    turnCount.current = 1
   }
 
   return {

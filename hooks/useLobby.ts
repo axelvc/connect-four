@@ -20,7 +20,7 @@ export default function useLobby({ onConnect, onMessage, onDisconnect }: LobbyOp
   const [myTurn, setMyTurn] = useState<Player | null>(null)
   const [code, setCode] = useState('')
 
-  function initializeP2P(): P2PNetwork {
+  function _initializeP2P(): P2PNetwork {
     if (p2p.current) return p2p.current
 
     const network = new P2PNetwork({
@@ -42,7 +42,7 @@ export default function useLobby({ onConnect, onMessage, onDisconnect }: LobbyOp
   }
 
   async function create() {
-    const network = initializeP2P()
+    const network = _initializeP2P()
     const id = await network.init()
 
     setStatus(LobbyStatus.WAITING)
@@ -51,7 +51,7 @@ export default function useLobby({ onConnect, onMessage, onDisconnect }: LobbyOp
   }
 
   async function join(code: string) {
-    const network = initializeP2P()
+    const network = _initializeP2P()
     const id = await network.init()
 
     network.connect(code)
