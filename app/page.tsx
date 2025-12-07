@@ -14,7 +14,7 @@ export enum PlayMode {
   ONLINE,
 }
 
-export const cn = (...inputs: any[]) => {
+export const cn = (...inputs: unknown[]) => {
   return twMerge(clsx(inputs))
 }
 
@@ -30,7 +30,7 @@ export default function GamePage() {
     onMessage: useEffectEvent<MessageHandler>(msg => {
       switch (msg.type) {
         case P2PEventType.MOVE:
-          move(msg.payload, true)
+          move(msg.payload as number, true)
           break
         case P2PEventType.RESET:
           reset(true)
