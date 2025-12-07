@@ -14,7 +14,7 @@ export interface P2PMessage {
 export type MessageHandler = (msg: P2PMessage) => void
 export type ConnectionHandler = () => void
 
-interface P2PNetworkOptions {
+export interface P2PNetworkOptions {
   onMessage: MessageHandler
   onConnect: ConnectionHandler
   onDisconnect: ConnectionHandler
@@ -39,11 +39,7 @@ export class P2PNetwork {
     const { default: Peer } = await import('peerjs')
 
     return new Promise((resolve, reject) => {
-      const options: PeerOptions = {
-        debug: 2,
-      }
-
-      this.peer = id ? new Peer(id, options) : new Peer(options)
+      this.peer = id ? new Peer(id) : new Peer()
 
       this.peer.on('open', id => {
         this.myId = id

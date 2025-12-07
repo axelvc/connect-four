@@ -1,6 +1,6 @@
-import { P2PEventType, P2PMessage, P2PNetwork } from '@/lib/p2p'
+import { P2PEventType, P2PNetwork, P2PNetworkOptions } from '@/lib/p2p'
 import { useEffect, useRef, useState } from 'react'
-import { Player } from './useGame'
+import { Player } from '@/lib/connnect_four'
 
 export enum LobbyStatus {
   IDLE,
@@ -8,13 +8,7 @@ export enum LobbyStatus {
   CONNECTED,
 }
 
-interface LobbyOptions {
-  onConnect?: () => void
-  onMessage?: (msg: P2PMessage) => void
-  onDisconnect?: () => void
-}
-
-export default function useLobby({ onConnect, onMessage, onDisconnect }: LobbyOptions = {}) {
+export function useLobby({ onConnect, onMessage, onDisconnect }: P2PNetworkOptions) {
   const p2p = useRef<P2PNetwork | null>(null)
   const [status, setStatus] = useState<LobbyStatus>(LobbyStatus.IDLE)
   const [myTurn, setMyTurn] = useState<Player | null>(null)

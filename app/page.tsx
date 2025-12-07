@@ -3,10 +3,11 @@
 import { useEffectEvent, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import clsx from 'clsx'
-import { ArrowDown, Check, ChevronLeft, Copy, RefreshCcw, Unplug, Globe, X } from 'lucide-react'
-import { Player, GameStatus, useGame } from '@/hooks/useGame'
-import useLobby, { LobbyStatus } from '@/hooks/useLobby'
+import { ArrowDown, Check, Copy, RefreshCcw, Unplug, Globe, X } from 'lucide-react'
+import { useGame } from '@/hooks/useGame'
+import { useLobby, LobbyStatus } from '@/hooks/useLobby'
 import { MessageHandler, P2PEventType } from '@/lib/p2p'
+import { GameStatus, Player } from '@/lib/connnect_four'
 
 export enum PlayMode {
   LOCAL,
