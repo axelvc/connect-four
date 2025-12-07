@@ -185,7 +185,7 @@ export default function GamePage() {
         {/* Online Setup Modal */}
         {isOnline && !isConnected && (
           <div className="modal">
-            <div className="box p-6 max-w-sm text-center w-full relative">
+            <div className="box p-6 max-w-11/12 sm:max-w-sm text-center w-full relative">
               <button onClick={leaveRoom} className="absolute top-2 left-2 cursor-pointer">
                 <X size={14} />
               </button>
